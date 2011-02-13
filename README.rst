@@ -1,5 +1,5 @@
-record
-======
+µrecord
+=======
 
 ``Record`` is a simple metaclass for creating classes whose instances are
 designed to hold a fixed number of named fields. It's similar to
@@ -7,7 +7,7 @@ designed to hold a fixed number of named fields. It's similar to
 than string formatting and ``exec``.
 
     >>> import math
-    >>> from record import Record
+    >>> from urecord import Record
 
     >>> class CartesianPoint(Record('x', 'y')):
     ...     def to_polar(self):

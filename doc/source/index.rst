@@ -1,5 +1,5 @@
-record Documentation
-====================
+µrecord Documentation
+=====================
 
-.. automodule:: record
+.. automodule:: urecord
     :members:

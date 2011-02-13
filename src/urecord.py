@@ -2,13 +2,13 @@ class Record(type):
     """
     A metaclass for creating structured records.
 
-    :class:`~record.Record` is a simple metaclass for creating classes whose
+    :class:`~urecord.Record` is a simple metaclass for creating classes whose
     instances are designed to hold a fixed number of named fields. It's similar
     to :func:`collections.namedtuple` in its operation, only it uses
     metaclasses rather than string formatting and ``exec``.
 
         >>> import math
-        >>> from record import Record
+        >>> from urecord import Record
         >>> class CartesianPoint(Record('x', 'y')):
         ...     def to_polar(self):
         ...         angle = math.atan2(self.y, self.x)
