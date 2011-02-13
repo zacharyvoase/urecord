@@ -8,19 +8,16 @@ than string formatting and ``exec``.
 
     >>> import math
     >>> from urecord import Record
-
     >>> class CartesianPoint(Record('x', 'y')):
     ...     def to_polar(self):
     ...         angle = math.atan2(self.y, self.x)
     ...         radius = math.sqrt(self.x ** 2 + self.y ** 2)
     ...         return PolarPoint(angle, radius)
-
     >>> class PolarPoint(Record('angle', 'radius')):
     ...     def to_cartesian(self):
     ...         x = self.radius * math.cos(self.angle)
     ...         y = self.radius * math.sin(self.angle)
     ...         return CartesianPoint(x, y)
-
     >>> p1 = CartesianPoint(3, 4)
     >>> p1
     CartesianPoint(x=3, y=4)
