@@ -1,0 +1,253 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>record &mdash; µrecord v0.0.1
+ documentation</title>
+    <link rel="stylesheet" href="../_static/flasky.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1
+',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="µrecord v0.0.1
+ documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+   
+  
+  <link media="only screen and (max-device-width: 480px)" href="../_static/small_flask.css" type= "text/css" rel="stylesheet" />
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">µrecord v0.0.1
+ documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for record</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="Record"><a class="viewcode-back" href="../index.html#record.Record">[docs]</a><span class="k">class</span> <span class="nc">Record</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A metaclass for creating structured records.</span>
+
+<span class="sd">    :class:`~record.Record` is a simple metaclass for creating classes whose</span>
+<span class="sd">    instances are designed to hold a fixed number of named fields. It&#39;s similar</span>
+<span class="sd">    to :func:`collections.namedtuple` in its operation, only it uses</span>
+<span class="sd">    metaclasses rather than string formatting and ``exec``.</span>
+
+<span class="sd">        &gt;&gt;&gt; import math</span>
+<span class="sd">        &gt;&gt;&gt; from record import Record</span>
+
+<span class="sd">        &gt;&gt;&gt; class CartesianPoint(Record(&#39;x&#39;, &#39;y&#39;)):</span>
+<span class="sd">        ...     def to_polar(self):</span>
+<span class="sd">        ...         angle = math.atan2(self.y, self.x)</span>
+<span class="sd">        ...         radius = math.sqrt(self.x ** 2 + self.y ** 2)</span>
+<span class="sd">        ...         return PolarPoint(angle, radius)</span>
+
+<span class="sd">        &gt;&gt;&gt; class PolarPoint(Record(&#39;angle&#39;, &#39;radius&#39;)):</span>
+<span class="sd">        ...     def to_cartesian(self):</span>
+<span class="sd">        ...         x = self.radius * math.cos(self.angle)</span>
+<span class="sd">        ...         y = self.radius * math.sin(self.angle)</span>
+<span class="sd">        ...         return CartesianPoint(x, y)</span>
+
+<span class="sd">        &gt;&gt;&gt; p1 = CartesianPoint(3, 4)</span>
+<span class="sd">        &gt;&gt;&gt; p1</span>
+<span class="sd">        CartesianPoint(x=3, y=4)</span>
+<span class="sd">        &gt;&gt;&gt; p2 = p1.to_polar()</span>
+<span class="sd">        &gt;&gt;&gt; p2</span>
+<span class="sd">        PolarPoint(angle=0.927..., radius=5.0)</span>
+<span class="sd">        &gt;&gt;&gt; p2._replace(angle=0.25)</span>
+<span class="sd">        PolarPoint(angle=0.25, radius=5.0)</span>
+<span class="sd">        &gt;&gt;&gt; p2._asdict()</span>
+<span class="sd">        {&#39;radius&#39;: 5.0, &#39;angle&#39;: 0.927...}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">mcls</span><span class="p">,</span> <span class="o">*</span><span class="n">properties</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;_fields&#39;</span><span class="p">:</span> <span class="n">properties</span><span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">properties</span><span class="p">):</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span> <span class="o">=</span> <span class="nb">property</span><span class="p">((</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span><span class="p">[</span><span class="n">i</span><span class="p">])(</span><span class="n">i</span><span class="p">))</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;Record(&#39;</span> <span class="o">+</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">repr</span><span class="p">,</span> <span class="n">properties</span><span class="p">))</span> <span class="o">+</span> <span class="s">&#39;)&#39;</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s">&#39;__name__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">RecordInstance</span><span class="p">,),</span> <span class="n">attrs</span><span class="p">)</span>
+
+</div>
+<span class="k">class</span> <span class="nc">RecordInstance</span><span class="p">(</span><span class="nb">tuple</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new :class:`RecordInstance`.</span>
+
+<span class="sd">        This method allows you to use both positional and keyword arguments to</span>
+<span class="sd">        create the record::</span>
+
+<span class="sd">            &gt;&gt;&gt; Point = Record(&#39;x&#39;, &#39;y&#39;, name=&#39;Point&#39;)</span>
+
+<span class="sd">            &gt;&gt;&gt; Point(1, 2)</span>
+<span class="sd">            Point(x=1, y=2)</span>
+
+<span class="sd">            &gt;&gt;&gt; Point(1, y=2)</span>
+<span class="sd">            Point(x=1, y=2)</span>
+
+<span class="sd">            &gt;&gt;&gt; Point(x=1, y=2)</span>
+<span class="sd">            Point(x=1, y=2)</span>
+
+<span class="sd">        It will also raise a :exc:`TypeError` if the provided arguments are</span>
+<span class="sd">        invalid.</span>
+
+<span class="sd">            &gt;&gt;&gt; Point(1, 2, 3)</span>
+<span class="sd">            Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">            TypeError: Expected 2 values, got 3</span>
+
+<span class="sd">            &gt;&gt;&gt; Point(1)</span>
+<span class="sd">            Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">            TypeError: Expected 2 values, got 1</span>
+
+<span class="sd">            &gt;&gt;&gt; Point(1, z=3)</span>
+<span class="sd">            Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">            TypeError: Unexpected argument &#39;z&#39;</span>
+
+<span class="sd">            &gt;&gt;&gt; Point(a=12)</span>
+<span class="sd">            Traceback (most recent call last):</span>
+<span class="sd">            ...</span>
+<span class="sd">            TypeError: Expected 2 values, got 1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_fields</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Expected </span><span class="si">%d</span><span class="s"> values, got </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_fields</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="n">unassigned</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+        <span class="n">slots</span> <span class="o">=</span> <span class="p">[[</span><span class="n">field</span><span class="p">,</span> <span class="n">unassigned</span><span class="p">]</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_fields</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_fields</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Expected </span><span class="si">%d</span><span class="s"> values, got </span><span class="si">%d</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_fields</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="n">slots</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_fields</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Unexpected argument </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+            <span class="n">slot</span> <span class="o">=</span> <span class="n">slots</span><span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">_fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="n">slot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">unassigned</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Got two values for argument </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+            <span class="n">slot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="p">(</span><span class="n">slot</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">slot</span> <span class="ow">in</span> <span class="n">slots</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Produce a useful representation of a :class:`RecordInstance`.</span>
+
+<span class="sd">            &gt;&gt;&gt; Record(&#39;a&#39;, &#39;b&#39;, name=&#39;Pair&#39;)(1, 2)</span>
+<span class="sd">            Pair(a=1, b=2)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a dictionary mapping field names to their values.</span>
+
+<span class="sd">            &gt;&gt;&gt; Pair = Record(&#39;a&#39;, &#39;b&#39;, name=&#39;Pair&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; r = Pair(1, 2)</span>
+<span class="sd">            &gt;&gt;&gt; r</span>
+<span class="sd">            Pair(a=1, b=2)</span>
+<span class="sd">            &gt;&gt;&gt; r._asdict()</span>
+<span class="sd">            {&#39;a&#39;: 1, &#39;b&#39;: 2}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">_replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replace specific fields of this record with new values.</span>
+
+<span class="sd">        Because tuples are immutable, this will return a new object.</span>
+
+<span class="sd">            &gt;&gt;&gt; Pair = Record(&#39;a&#39;, &#39;b&#39;, name=&#39;Pair&#39;)</span>
+<span class="sd">            &gt;&gt;&gt; r = Pair(1, 2)</span>
+<span class="sd">            &gt;&gt;&gt; r</span>
+<span class="sd">            Pair(a=1, b=2)</span>
+<span class="sd">            &gt;&gt;&gt; r._replace(b=14)</span>
+<span class="sd">            Pair(a=1, b=14)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="o">*</span><span class="nb">tuple</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fields</span><span class="p">)))</span>
+
+
+<span class="k">def</span> <span class="nf">_get_tests</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Enables ``python setup.py test``.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">doctest</span>
+    <span class="k">return</span> <span class="n">doctest</span><span class="o">.</span><span class="n">DocTestSuite</span><span class="p">(</span><span class="n">optionflags</span><span class="o">=</span><span class="n">doctest</span><span class="o">.</span><span class="n">ELLIPSIS</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper"><h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      <a href="http://creativecommons.org/publicdomain/zero/1.0/">No rights reserved</a> |
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a>.
+    </div>
+  </body>
+</html>
