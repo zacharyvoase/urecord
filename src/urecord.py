@@ -1,4 +1,5 @@
 class Record(type):
+
     """
     A metaclass for creating structured records.
 
@@ -35,7 +36,12 @@ class Record(type):
         attrs = {'_fields': properties}
 
         for i, prop in enumerate(properties):
-            attrs[prop] = property((lambda i: lambda obj: obj[i])(i))
+            # Create a lexical binding of i for each iteration. Equivalent to a
+            # `(let)` in Scheme/LISP.
+            attrs[prop] = property(
+                (lambda i:
+                    (lambda obj: RecordInstance.__getitem__(obj, i))
+                )(i))
 
         name = kwargs.get('name')
         if name is None:
@@ -48,6 +54,7 @@ class Record(type):
 class RecordInstance(tuple):
 
     def __new__(cls, *args, **kwargs):
+
         """
         Create a new :class:`RecordInstance`.
 
@@ -88,6 +95,7 @@ class RecordInstance(tuple):
             ...
             TypeError: Expected 2 values, got 1
         """
+
         if not kwargs:
             if len(args) != len(cls._fields):
                 raise TypeError("Expected %d values, got %d" % (
@@ -115,16 +123,20 @@ class RecordInstance(tuple):
         return tuple.__new__(cls, (slot[1] for slot in slots))
 
     def __repr__(self):
+
         """
         Produce a useful representation of a :class:`RecordInstance`.
 
             >>> Record('a', 'b', name='Pair')(1, 2)
             Pair(a=1, b=2)
         """
-        args = ', '.join('%s=%r' % (field, self[i]) for i, field in enumerate(self._fields))
+
+        args = ', '.join('%s=%r' % (field, RecordInstance.__getitem__(self, i))
+                         for i, field in enumerate(self._fields))
         return '%s(%s)' % (type(self).__name__, args)
 
     def _asdict(self):
+
         """
         Return a dictionary mapping field names to their values.
 
@@ -135,9 +147,11 @@ class RecordInstance(tuple):
             >>> r._asdict()
             {'a': 1, 'b': 2}
         """
+
         return dict(zip(self._fields, self))
 
     def _replace(self, **kwargs):
+
         """
         Replace specific fields of this record with new values.
 
@@ -150,10 +164,13 @@ class RecordInstance(tuple):
             >>> r._replace(b=14)
             Pair(a=1, b=14)
         """
-        return type(self)(*tuple(kwargs.get(field, self[i]) for i, field in enumerate(self._fields)))
+
+        return type(self)(*tuple(kwargs.get(field, RecordInstance.__getitem__(self, i))
+                                 for i, field in enumerate(self._fields)))
 
 
 def _get_tests():
     """Enables ``python setup.py test``."""
+
     import doctest
     return doctest.DocTestSuite(optionflags=doctest.ELLIPSIS)
