@@ -163,10 +163,42 @@ class RecordInstance(tuple):
             Pair(a=1, b=2)
             >>> r._replace(b=14)
             Pair(a=1, b=14)
+
+        This will also work if you've overridden :meth:`__new__` and
+        :meth:`__getitem__`. A more complex example:
+
+            >>> import math
+            >>> Cartesian = Record('x', 'y', name='Cartesian')
+            >>> class Polar(Cartesian):
+            ...     def __new__(cls, radius, angle):
+            ...         x = radius * math.cos(angle)
+            ...         y = radius * math.sin(angle)
+            ...         return super(Polar, cls).__new__(cls, x, y)
+            ...     @property
+            ...     def radius(self):
+            ...         return math.sqrt(self.x ** 2 + self.y ** 2)
+            ...     @property
+            ...     def angle(self):
+            ...         return math.atan2(self.y, self.x)
+            >>> point = Polar(1, 2)
+            >>> point.radius
+            1.0
+            >>> point
+            Polar(x=-0.4161468365471424, y=0.9092974268256817)
+            >>> point._replace(x=1)
+            Polar(x=1, y=0.9092974268256817)
+            >>> point._replace(x=1).radius
+            1.351599722710761
+
+        Note that the arguments for creating ``Polar`` objects is totally
+        different, but :meth:`_replace` still operates on the underlying record
+        fields rather than the public interface.
         """
 
-        return type(self)(*tuple(kwargs.get(field, RecordInstance.__getitem__(self, i))
-                                 for i, field in enumerate(self._fields)))
+        return RecordInstance.__new__(
+            type(self),
+            *tuple(kwargs.get(field, RecordInstance.__getitem__(self, i))
+                   for i, field in enumerate(self._fields)))
 
 
 def _get_tests():
