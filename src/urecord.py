@@ -3,10 +3,10 @@ class Record(type):
     """
     A metaclass for creating structured records.
 
-    :class:`~urecord.Record` is a simple metaclass for creating classes whose
-    instances are designed to hold a fixed number of named fields. It's similar
-    to :func:`collections.namedtuple` in its operation, only it uses
-    metaclasses rather than string formatting and ``exec``.
+    :class:`Record` is a simple metaclass for creating classes whose instances
+    are designed to hold a fixed number of named fields. It's similar to
+    ``collections.namedtuple`` in its operation, only it uses metaclasses
+    rather than string formatting and ``exec``.
 
         >>> import math
         >>> from urecord import Record
@@ -30,6 +30,20 @@ class Record(type):
         PolarPoint(angle=0.25, radius=5.0)
         >>> p2._asdict()
         {'radius': 5.0, 'angle': 0.927...}
+
+    For defining generic methods which operate over a class of records, you can
+    subclass :class:`RecordInstance` and pass this into :class:`Record`:
+
+        >>> from urecord import RecordInstance
+        >>> class EuVector(RecordInstance):
+        ...     def magnitude(self):
+        ...         return math.sqrt(sum(cmp ** 2 for cmp in self))
+        >>> Vector2D = Record('x', 'y', name='Vector2D', instance=EuVector)
+        >>> Vector3D = Record('x', 'y', 'z', name='Vector3D', instance=EuVector)
+        >>> Vector2D(3, 4).magnitude()
+        5.0
+        >>> Vector3D(3, 4, 5).magnitude()  # doctest: +ELLIPSIS
+        7.0710...
     """
 
     def __new__(mcls, *properties, **kwargs):
@@ -48,7 +62,8 @@ class Record(type):
             name = 'Record(' + ', '.join(map(repr, properties)) + ')'
         attrs['__name__'] = name
 
-        return type(name, (RecordInstance,), attrs)
+        instance = kwargs.get('instance', RecordInstance)
+        return type(name, (instance,), attrs)
 
 
 class RecordInstance(tuple):
